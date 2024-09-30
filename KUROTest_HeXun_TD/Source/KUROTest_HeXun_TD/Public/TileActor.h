@@ -28,7 +28,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	
+
+	UPROPERTY(EditAnywhere)TArray<int>NextFace;
 	bool bIsWatched = false;
 
 	bool bIsSelected = false;

@@ -34,8 +34,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	bool bIsActivating=false;
-	TArray<ENextFace> NextFace;
+	bool bIsActivating = false;
+	int NextFace;
 	
 	UPROPERTY(EditAnywhere)TArray<ATileActor*> TilesArray;
 };

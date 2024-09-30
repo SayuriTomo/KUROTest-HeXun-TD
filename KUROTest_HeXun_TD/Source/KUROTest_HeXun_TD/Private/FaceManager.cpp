@@ -33,6 +33,7 @@ void AFaceManager::Tick(float DeltaTime)
 	{
 		if(TilesArray[i]->bIsSelected)
 		{
+			/*
 			NextFace.Empty();
 			if(i<3)
 			{
@@ -61,8 +62,10 @@ void AFaceManager::Tick(float DeltaTime)
 				NextFace.Add(ENextFace::FACE_OPPOSITE);
 				UE_LOG(LogTemp,Warning,TEXT("OPPO"))
 			}
+			*/
 			
 			TilesArray[i]->bIsSelected = false;
+			NextFace = TilesArray[i]->NextFace[0];
 			bIsActivating = true;
 			break;
 		}

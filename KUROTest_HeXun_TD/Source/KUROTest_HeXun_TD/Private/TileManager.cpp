@@ -36,34 +36,11 @@ void ATileManager::Tick(float DeltaTime)
 		if(Face->bIsActivating)
 		{
 			Face->bIsActivating = false;
-			if(Face->NextFace.Num()==1)
-			{
-				switch(Face->NextFace[0])
-				{
-					case FACE_UP:
-						AddActorLocalRotation(FRotator(90,0,0));
-						break;
-
-					case FACE_DOWN:
-						AddActorLocalRotation(FRotator(-90,0,0));
-						break;
-					
-					case FACE_LEFT:
-						AddActorLocalRotation(FRotator(0,90,0));
-						break;
-
-					case FACE_RIGHT:
-						AddActorLocalRotation(FRotator(0,-90,0));
-						break;
-
-					case FACE_OPPOSITE:
-						AddActorLocalRotation(FRotator(0,180,180));
-						break;
-
-					default:
-						break;
-				}
-			}
+			int Index = Face->NextFace;
+			UE_LOG(LogTemp,Warning,TEXT("Attempting to move face %d"),Index);
+			FRotator RotatorRequired =
+				Face->GetActorRotation()-FacesArray[Index]->GetActorRotation();
+			AddActorLocalRotation(RotatorRequired);
 		}
 	}
 }
