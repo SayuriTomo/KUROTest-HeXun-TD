@@ -7,6 +7,8 @@
 #include "Components/CapsuleComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "TileActor.h"
+#include "TileManager.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -50,20 +52,29 @@ void AKUROTest_HeXun_TDCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 		PlayerController->SetShowMouseCursor(true);
-		PlayerController->SetIgnoreLookInput(true);
+		//PlayerController->SetIgnoreLookInput(true);
 	}
-
-	
-	
-
-	
-
 }
 
 void AKUROTest_HeXun_TDCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	CallTrace();
+}
+
+void AKUROTest_HeXun_TDCharacter::Select()
+{
+	if(bIsMyTurn)
+	{
+		if(LastTileWatching&&LastTileWatching->BaseColor==FLinearColor::Gray)
+		{
+			bIsMyTurn = false;
+			LastTileWatching->bIsSelected = true;
+			LastTileWatching->BaseColor = FLinearColor::Blue;
+			LastTileWatching->ChangeColor(FLinearColor::Blue,true);
+			LastTileWatching = nullptr;
+		}
+	}
 }
 
 void AKUROTest_HeXun_TDCharacter::CallTrace()
@@ -74,8 +85,6 @@ void AKUROTest_HeXun_TDCharacter::CallTrace()
 		if(PlayerController->DeprojectMousePositionToWorld(
 			MousePosition,MouseRotation))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("MousePosition%f,%f,%f"), MousePosition.X,MousePosition.Y,MousePosition.Z);
-
 			FCollisionQueryParams CollisionParams(TEXT("CollisionParams"),true,NULL);
 			CollisionParams.bTraceComplex = true;
 			CollisionParams.bReturnPhysicalMaterial=false;
@@ -84,13 +93,42 @@ void AKUROTest_HeXun_TDCharacter::CallTrace()
 			FVector EndLocation = MousePosition+MouseRotation*1000;
 			FHitResult HitResult;
 
-			GetWorld()->LineTraceSingleByChannel(
-				HitResult,
-				MousePosition,
-				EndLocation,
-				ECC_Visibility,
-				CollisionParams);
-			DrawDebugLine(GetWorld(), MousePosition, HitResult.GetActor() ? HitResult.Location : EndLocation, FColor::Red, false, 1.0f);
+			if(GetWorld()->LineTraceSingleByChannel(HitResult,MousePosition,EndLocation,ECC_Visibility,CollisionParams))
+			{
+				ProcessTraceResult(HitResult);
+			}
+			
+			//DrawDebugLine(GetWorld(), MousePosition, HitResult.GetActor() ? HitResult.Location : EndLocation, FColor::Red, false, 1.0f);
+		}
+	}
+}
+
+void AKUROTest_HeXun_TDCharacter::ProcessTraceResult(FHitResult& HitResult)
+{
+	if(ATileActor* TileActor = Cast<ATileActor>(HitResult.GetActor()))
+	{
+		
+		if(LastTileWatching)
+		{
+			if(LastTileWatching!=TileActor)
+			{
+				LastTileWatching->bIsWatched = false;
+				LastTileWatching = TileActor;
+				LastTileWatching->bIsWatched = true;
+			}
+		}
+		else
+		{
+			LastTileWatching = TileActor;
+			LastTileWatching->bIsWatched = true;
+		}
+	}
+	else
+	{
+		if(LastTileWatching)
+		{
+			LastTileWatching->bIsWatched = false;
+			LastTileWatching = nullptr;
 		}
 	}
 }
@@ -111,6 +149,10 @@ void AKUROTest_HeXun_TDCharacter::SetupPlayerInputComponent(class UInputComponen
 
 		//Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AKUROTest_HeXun_TDCharacter::Look);
+
+		//Select
+		EnhancedInputComponent->BindAction(SelectAction, ETriggerEvent::Triggered, this, &AKUROTest_HeXun_TDCharacter::Select);
+
 	}
 }
 

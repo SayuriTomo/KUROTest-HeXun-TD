@@ -28,7 +28,12 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	
+	bool bIsWatched = false;
 
+	bool bIsSelected = false;
+	FLinearColor BaseColor = FLinearColor::Gray;
+	
 	void ChangeColor(FLinearColor ColorToChange, bool bIsBaseOrEdge);
 
 };

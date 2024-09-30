@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "TileActor.h"
 #include "KUROTest_HeXun_TDCharacter.generated.h"
 
 class UInputComponent;
@@ -48,10 +49,16 @@ protected:
 
 	virtual void Tick(float DeltaSeconds);
 
+	bool bIsMyTurn=true;
+	UPROPERTY(VisibleAnywhere)ATileActor* LastTileWatching;
+	void Select();
 	void CallTrace();
+	void ProcessTraceResult(FHitResult& HitResult);
 
 public:
-		
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	class UInputAction* SelectAction;
+	
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "TileActor.h"
+#include "FaceManager.h"
 #include "GameFramework/Actor.h"
 #include "TileManager.generated.h"
 
@@ -15,6 +15,7 @@ class KUROTEST_HEXUN_TD_API ATileManager : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ATileManager();
+	UPROPERTY(EditAnywhere)UStaticMeshComponent* TileManagerMesh;
 
 protected:
 	// Called when the game starts or when spawned
@@ -24,5 +25,5 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	//UPROPERTY(EditAnywhere) TArray<*> TilesArray; 
+	UPROPERTY(EditAnywhere)TArray<AFaceManager*> FacesArray;
 };

@@ -3,6 +3,8 @@
 
 #include "KUROTest_HeXun_TD/Public/TileActor.h"
 
+#include "StaticMeshAttributes.h"
+
 // Sets default values
 ATileActor::ATileActor()
 {
@@ -31,6 +33,15 @@ void ATileActor::BeginPlay()
 void ATileActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if(bIsWatched)
+	{
+		ChangeColor(FLinearColor::Blue,false);
+	}
+	else
+	{
+		ChangeColor(FLinearColor::Gray,false);
+	}
 }
 
 void ATileActor::ChangeColor(FLinearColor ColorToChange, bool bIsBaseOrEdge)
