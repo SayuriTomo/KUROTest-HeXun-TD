@@ -34,8 +34,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	FLinearColor bIsWin();
 	bool bIsActivating = false;
+	bool bIsFinished = false;
 	int NextFace;
-	
+	UPROPERTY(EditAnywhere)TArray<FRotator> DegreeSet;
 	UPROPERTY(EditAnywhere)TArray<ATileActor*> TilesArray;
 };

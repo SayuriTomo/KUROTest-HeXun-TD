@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "FaceManager.h"
+#include "Components/Button.h"
 #include "GameFramework/Actor.h"
 #include "TileManager.generated.h"
 
@@ -24,6 +25,16 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	void MoveToAITurn();
+	bool bIsAITurn = false;
 
+
+	FTimerHandle DelayTimerHandle;
+	
+	float DelayTime = 5;
+	int CurrentFaceIndex;
+	bool bIsRotating = false;
+	FRotator DegreeRequired;
+	float CurrentRotation = 0.0f;
 	UPROPERTY(EditAnywhere)TArray<AFaceManager*> FacesArray;
 };

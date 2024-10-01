@@ -49,7 +49,7 @@ protected:
 
 	virtual void Tick(float DeltaSeconds);
 
-	bool bIsMyTurn=true;
+	
 	UPROPERTY(VisibleAnywhere)ATileActor* LastTileWatching;
 	void Select();
 	void CallTrace();
@@ -92,7 +92,7 @@ public:
 	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
-
+	bool bIsMyTurn=true;
 
 };
 

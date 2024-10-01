@@ -52,7 +52,8 @@ void AKUROTest_HeXun_TDCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 		PlayerController->SetShowMouseCursor(true);
-		//PlayerController->SetIgnoreLookInput(true);
+		PlayerController->SetIgnoreLookInput(true);
+		PlayerController->SetIgnoreMoveInput(true);
 	}
 }
 

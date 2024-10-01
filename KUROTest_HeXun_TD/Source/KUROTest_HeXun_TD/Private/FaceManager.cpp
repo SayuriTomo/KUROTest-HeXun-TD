@@ -33,42 +33,54 @@ void AFaceManager::Tick(float DeltaTime)
 	{
 		if(TilesArray[i]->bIsSelected)
 		{
-			/*
-			NextFace.Empty();
-			if(i<3)
-			{
-				NextFace.Add(ENextFace::FACE_UP);
-				UE_LOG(LogTemp,Warning,TEXT("UP"))
-			}
-			else if(i>5)
-			{
-				NextFace.Add(ENextFace::FACE_DOWN);
-				UE_LOG(LogTemp,Warning,TEXT("D"))
-			}
-
-			if(i==0||i==3||i==6)
-			{
-				NextFace.Add(ENextFace::FACE_LEFT);
-				UE_LOG(LogTemp,Warning,TEXT("L"))
-			}
-			else if(i==2||i==5||i==8)
-			{
-				NextFace.Add(ENextFace::FACE_RIGHT);
-				UE_LOG(LogTemp,Warning,TEXT("R"))
-			}
-
-			if(i==4)
-			{
-				NextFace.Add(ENextFace::FACE_OPPOSITE);
-				UE_LOG(LogTemp,Warning,TEXT("OPPO"))
-			}
-			*/
-			
 			TilesArray[i]->bIsSelected = false;
-			NextFace = TilesArray[i]->NextFace[0];
+			if(TilesArray[i]->NextFace.Num()>1)
+			{
+				NextFace = TilesArray[i]->NextFace[FMath::RandRange(0,1)];
+			}
+			else
+			{
+				NextFace = TilesArray[i]->NextFace[0];
+			}
 			bIsActivating = true;
 			break;
 		}
 	}
+}
+
+FLinearColor AFaceManager::bIsWin()
+{
+	for (int Row = 0; Row < 3; Row++)
+	{
+		int StartIndex = Row * 3;
+		if (TilesArray[StartIndex]->BaseColor != FLinearColor::Gray &&
+			TilesArray[StartIndex]->BaseColor == TilesArray[StartIndex + 1]->BaseColor &&
+			TilesArray[StartIndex]->BaseColor == TilesArray[StartIndex + 2]->BaseColor)
+		{
+			return TilesArray[StartIndex]->BaseColor;
+		}
+	}
+
+	for (int Col = 0; Col < 3; Col++)
+	{
+		if (TilesArray[Col]->BaseColor != FLinearColor::Gray &&
+			TilesArray[Col]->BaseColor == TilesArray[Col+3]->BaseColor &&
+			TilesArray[Col]->BaseColor == TilesArray[Col+6]->BaseColor)
+		{
+			return TilesArray[Col]->BaseColor;
+		}
+	}
+	
+	if (TilesArray[0]->BaseColor != FLinearColor::Gray && TilesArray[0]->BaseColor == TilesArray[4]->BaseColor && TilesArray[0]->BaseColor == TilesArray[8]->BaseColor)
+	{
+		return TilesArray[0]->BaseColor;
+	}
+
+	if (TilesArray[2]->BaseColor != FLinearColor::Gray && TilesArray[2]->BaseColor == TilesArray[4]->BaseColor && TilesArray[2]->BaseColor == TilesArray[6]->BaseColor)
+	{
+		return TilesArray[2]->BaseColor;
+	}
+	
+	return FLinearColor::Gray;
 }
 
