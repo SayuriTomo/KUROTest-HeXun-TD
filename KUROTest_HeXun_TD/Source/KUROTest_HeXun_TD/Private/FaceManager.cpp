@@ -33,6 +33,7 @@ void AFaceManager::Tick(float DeltaTime)
 	{
 		if(TilesArray[i]->bIsSelected)
 		{
+			UE_LOG(LogTemp,Warning,TEXT("face tile %i"),i)
 			TilesArray[i]->bIsSelected = false;
 			if(TilesArray[i]->NextFace.Num()>1)
 			{
@@ -43,12 +44,22 @@ void AFaceManager::Tick(float DeltaTime)
 				NextFace = TilesArray[i]->NextFace[0];
 			}
 			bIsActivating = true;
-			break;
+			UE_LOG(LogTemp,Warning,TEXT("FACE Attempting to move face %i"),NextFace)
 		}
 	}
 }
 
-FLinearColor AFaceManager::bIsWin()
+void AFaceManager::GenerateTiles()
+{
+	for(ATileActor* Tile:this->TilesArray)
+	{
+		Tile->BaseColor=FLinearColor::Gray;
+		Tile->ChangeColor(FLinearColor::Gray,true);
+		Tile->SetHidden(false);
+	}
+}
+
+FLinearColor AFaceManager::CheckFaceWin()
 {
 	for (int Row = 0; Row < 3; Row++)
 	{
@@ -82,5 +93,17 @@ FLinearColor AFaceManager::bIsWin()
 	}
 	
 	return FLinearColor::Gray;
+}
+
+bool AFaceManager::CheckFaceDraw()
+{
+	for(ATileActor* TileActor:TilesArray)
+	{
+		if(TileActor->BaseColor==FLinearColor::Gray)
+		{
+			return false;
+		}
+	}
+	return true;
 }
 

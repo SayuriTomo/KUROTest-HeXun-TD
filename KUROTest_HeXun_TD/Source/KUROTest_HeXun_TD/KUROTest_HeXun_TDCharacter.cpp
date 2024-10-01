@@ -65,7 +65,7 @@ void AKUROTest_HeXun_TDCharacter::Tick(float DeltaSeconds)
 
 void AKUROTest_HeXun_TDCharacter::Select()
 {
-	if(bIsMyTurn)
+	if(bIsMyTurn&&bIsGameStart)
 	{
 		if(LastTileWatching&&LastTileWatching->BaseColor==FLinearColor::Gray)
 		{

@@ -34,7 +34,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	FLinearColor bIsWin();
+	void GenerateTiles();
+	FLinearColor CheckFaceWin();
+	bool CheckFaceDraw();
 	bool bIsActivating = false;
 	bool bIsFinished = false;
 	int NextFace;

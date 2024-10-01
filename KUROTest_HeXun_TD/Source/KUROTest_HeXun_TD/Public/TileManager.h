@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "FaceManager.h"
-#include "Components/Button.h"
 #include "GameFramework/Actor.h"
 #include "TileManager.generated.h"
 
@@ -26,13 +25,18 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	void MoveToAITurn();
-	bool bIsAITurn = false;
 
-
+	UFUNCTION(BlueprintCallable)void GenerateFaces();
+	int PlayerScore;
+	int EnemyScore;
 	FTimerHandle DelayTimerHandle;
-	
-	float DelayTime = 5;
+	bool bIsGameStart = false;
+	float DelayTime = 2;
 	int CurrentFaceIndex;
+	FString LastWinner = "";
+
+	void EndGame();
+	bool bIsEndGame = false;
 	bool bIsRotating = false;
 	FRotator DegreeRequired;
 	float CurrentRotation = 0.0f;
