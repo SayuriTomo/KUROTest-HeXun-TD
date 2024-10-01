@@ -49,16 +49,6 @@ void AFaceManager::Tick(float DeltaTime)
 	}
 }
 
-void AFaceManager::GenerateTiles()
-{
-	for(ATileActor* Tile:this->TilesArray)
-	{
-		Tile->BaseColor=FLinearColor::Gray;
-		Tile->ChangeColor(FLinearColor::Gray,true);
-		Tile->SetHidden(false);
-	}
-}
-
 FLinearColor AFaceManager::CheckFaceWin()
 {
 	for (int Row = 0; Row < 3; Row++)

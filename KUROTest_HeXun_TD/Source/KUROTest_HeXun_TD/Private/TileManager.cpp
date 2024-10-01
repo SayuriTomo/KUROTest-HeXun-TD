@@ -23,11 +23,7 @@ void ATileManager::BeginPlay()
 	
 	for(AFaceManager* Face:FacesArray)
 	{
-		Face->AttachToActor(this,FAttachmentTransformRules::KeepWorldTransform);\
-		for(ATileActor* TileActor:Face->TilesArray)
-		{
-			//TileActor->SetHidden(true);
-		}
+		Face->AttachToActor(this,FAttachmentTransformRules::KeepWorldTransform);
 	}
 }
 
@@ -68,7 +64,7 @@ void ATileManager::Tick(float DeltaTime)
 				bool Flag = true;
 				while (Flag)
 				{
-					if(!FacesArray[CurrentFaceIndex]->bIsFinished)
+					if(!FacesArray[CurrentFaceIndex]->bIsFinished && Face != FacesArray[CurrentFaceIndex])
 					{
 						Flag = false;
 					}
@@ -80,12 +76,6 @@ void ATileManager::Tick(float DeltaTime)
 				
 				UE_LOG(LogTemp,Warning,TEXT("Attempting to move face %i"),CurrentFaceIndex);
 				DegreeRequired = Face->DegreeSet[CurrentFaceIndex];
-				UE_LOG(LogTemp,Warning,TEXT("0p%f,y%f,r%f"),Face->DegreeSet[0].Pitch,Face->DegreeSet[0].Yaw,Face->DegreeSet[0].Roll)
-				UE_LOG(LogTemp,Warning,TEXT("1p%f,y%f,r%f"),Face->DegreeSet[1].Pitch,Face->DegreeSet[1].Yaw,Face->DegreeSet[1].Roll)
-				UE_LOG(LogTemp,Warning,TEXT("2p%f,y%f,r%f"),Face->DegreeSet[2].Pitch,Face->DegreeSet[2].Yaw,Face->DegreeSet[2].Roll)
-				UE_LOG(LogTemp,Warning,TEXT("3p%f,y%f,r%f"),Face->DegreeSet[3].Pitch,Face->DegreeSet[3].Yaw,Face->DegreeSet[3].Roll)
-				UE_LOG(LogTemp,Warning,TEXT("4p%f,y%f,r%f"),Face->DegreeSet[4].Pitch,Face->DegreeSet[4].Yaw,Face->DegreeSet[4].Roll)
-				UE_LOG(LogTemp,Warning,TEXT("5p%f,y%f,r%f"),Face->DegreeSet[5].Pitch,Face->DegreeSet[5].Yaw,Face->DegreeSet[5].Roll)
 				
 				UE_LOG(LogTemp,Warning,TEXT("p%f,y%f,r%f"),DegreeRequired.Pitch,DegreeRequired.Yaw,DegreeRequired.Roll);
 				Face->bIsActivating = false;
@@ -118,58 +108,201 @@ void ATileManager::Tick(float DeltaTime)
 void ATileManager::MoveToAITurn()
 {
 	GetWorld()->GetTimerManager().ClearTimer(DelayTimerHandle);
-	bool Flag = true;
-	int RandTile = 0;
-	while (Flag)
+	if(FMath::RandBool())
 	{
-		RandTile = FMath::RandRange(0,8);
-		if(FacesArray[CurrentFaceIndex]->TilesArray[RandTile]->BaseColor == FLinearColor::Gray)
+		bool Flag = true;
+		int RandTile = 0;
+		while (Flag)
 		{
-			Flag = false;
+			RandTile = FMath::RandRange(0,8);
+			if(FacesArray[CurrentFaceIndex]->TilesArray[RandTile]->BaseColor == FLinearColor::Gray)
+			{
+				Flag = false;
+			}
 		}
-	}
-	FacesArray[CurrentFaceIndex]->TilesArray[RandTile]->ChangeColor(FLinearColor::Red,true);
-	FacesArray[CurrentFaceIndex]->TilesArray[RandTile]->bIsSelected = true;
-	FacesArray[CurrentFaceIndex]->TilesArray[RandTile]->BaseColor = FLinearColor::Red;
+		FacesArray[CurrentFaceIndex]->TilesArray[RandTile]->ChangeColor(FLinearColor::Red,true);
+		FacesArray[CurrentFaceIndex]->TilesArray[RandTile]->bIsSelected = true;
+		FacesArray[CurrentFaceIndex]->TilesArray[RandTile]->BaseColor = FLinearColor::Red;
 
-	Cast<AKUROTest_HeXun_TDCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn())->bIsMyTurn = true;
+		Cast<AKUROTest_HeXun_TDCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn())->bIsMyTurn = true;
+	}
+	else
+	{
+		GenerateAIDecision();
+	}
 }
 
 void ATileManager::GenerateFaces()
 {
 	for(AFaceManager* Face:FacesArray)
 	{
-		for(ATileActor* TileActor:Face->TilesArray)
+		Face->bIsFinished = false;
+		for(ATileActor* Tile:Face->TilesArray)
 		{
-			TileActor->BaseColor=FLinearColor::Gray;
-			TileActor->ChangeColor(FLinearColor::Gray,true);
-			//TileActor->SetHidden(false);
+			Tile->BaseColor=FLinearColor::Gray;
+			Tile->ChangeColor(FLinearColor::Gray,true);
 		}
 	}
 	Cast<AKUROTest_HeXun_TDCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn())->bIsGameStart = true;
+	Cast<AKUROTest_HeXun_TDCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn())->bIsMyTurn = true;
 	bIsGameStart = true;
 	bIsRotating = false;
 	CurrentRotation = 0.0f;
 	PlayerScore = 0;
-	EnemyScore=0;
-	DegreeRequired = FRotator(0);
-	SetActorRotation(FRotator(0));
+	EnemyScore = 0;
+	DegreeRequired = FRotator(0,0,0);
 }
 
 void ATileManager::EndGame()
 {
 	bIsGameStart = false;
 	bIsEndGame = true;
-	bIsRotating=false;
+	bIsRotating = false;
 	CurrentRotation = 0.0f;
 	SetActorRotation(FRotator(0,0,0));
-	for(AFaceManager* Face:FacesArray)
+	if(PlayerScore>=3)
 	{
-		///for(ATileActor* TileActor:Face->TilesArray)
-		//{
-			//TileActor->SetHidden(true);
-		//}
+		LastWinner = 1;
+	}
+	else
+	{
+		LastWinner = 2;
+	}
+}
+
+
+void ATileManager::GenerateAIDecision()
+{
+	int BestScore = INT_MIN;
+	int BestMove = -1;
+
+	for (int i = 0; i < 9; ++i) {
+		if (FacesArray[CurrentFaceIndex]->TilesArray[i]->BaseColor == FLinearColor::Gray)
+		{
+			FacesArray[CurrentFaceIndex]->TilesArray[i]->BaseColor = FLinearColor::Red;
+			int Score = Minimax(FacesArray[CurrentFaceIndex]->TilesArray, true);
+			FacesArray[CurrentFaceIndex]->TilesArray[i]->BaseColor = FLinearColor::Gray;
+
+			if (Score > BestScore) {
+				BestScore = Score;
+				BestMove = i;
+			}
+		}
 	}
 	
-	LastWinner = PlayerScore>=3?"玩家":"敌人";
+	FacesArray[CurrentFaceIndex]->TilesArray[BestMove]->ChangeColor(FLinearColor::Red,true);
+	FacesArray[CurrentFaceIndex]->TilesArray[BestMove]->bIsSelected = true;
+	FacesArray[CurrentFaceIndex]->TilesArray[BestMove]->BaseColor = FLinearColor::Red;
+	
+	Cast<AKUROTest_HeXun_TDCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn())->bIsMyTurn = true;
+}
+
+int ATileManager::Evaluate(TArray<ATileActor*> TilesArray)
+{
+	for (int i = 0; i < 3; ++i) {
+		if (TilesArray[i * 3]->BaseColor == TilesArray[i * 3 + 1]->BaseColor &&
+			TilesArray[i * 3 + 1]->BaseColor == TilesArray[i * 3 + 2]->BaseColor &&
+			TilesArray[i * 3]->BaseColor != FLinearColor::Gray)
+		{
+			if(TilesArray[i * 3]->BaseColor == FLinearColor::Red)
+			{
+				return 1;
+			}
+			else if(TilesArray[i * 3]->BaseColor == FLinearColor::Blue)
+			{
+				return -1;
+			}
+		}
+		
+		if (TilesArray[i]->BaseColor == TilesArray[i + 3]->BaseColor &&
+			TilesArray[i + 3]->BaseColor == TilesArray[i + 2 * 3]->BaseColor &&
+			TilesArray[i]->BaseColor != FLinearColor::Gray)
+		{
+			if(TilesArray[i]->BaseColor == FLinearColor::Red)
+			{
+				return 1;
+			}
+			else if(TilesArray[i]->BaseColor == FLinearColor::Blue)
+			{
+				return -1;
+			}
+		}
+	}
+	
+	if (TilesArray[0]->BaseColor == TilesArray[4]->BaseColor &&
+		TilesArray[4]->BaseColor == TilesArray[8]->BaseColor &&
+		TilesArray[0]->BaseColor != FLinearColor::Gray)
+	{
+		if(TilesArray[0]->BaseColor == FLinearColor::Red)
+		{
+			return 1;
+		}
+		else if(TilesArray[0]->BaseColor == FLinearColor::Blue)
+		{
+			return -1;
+		}
+	}
+	
+	if (TilesArray[2]->BaseColor == TilesArray[4]->BaseColor &&
+		TilesArray[4]->BaseColor == TilesArray[6]->BaseColor &&
+		TilesArray[2]->BaseColor != FLinearColor::Gray)
+	{
+		if(TilesArray[2]->BaseColor == FLinearColor::Red)
+		{
+			return 1;
+		}
+		else if(TilesArray[2]->BaseColor == FLinearColor::Blue)
+		{
+			return -1;
+		}
+	}
+	
+	return 0;
+}
+
+int ATileManager::Minimax(TArray<ATileActor*> TilesArray, bool bIsMax)
+{
+	int Score = Evaluate(TilesArray);
+	
+	if (Score != 0||IsFull(TilesArray))
+		return Score;
+
+	if (bIsMax)
+	{
+		int BestScore = INT_MIN;
+		for (int i = 0; i < 9; i++) {
+			if (TilesArray[i]->BaseColor == FLinearColor::Gray)
+			{
+				TilesArray[i]->BaseColor = FLinearColor::Red;
+				BestScore = FMath::Max(BestScore, Minimax(TilesArray, false));
+				TilesArray[i]->BaseColor = FLinearColor::Gray;
+			}
+		}
+		return BestScore;
+	}
+	else
+	{
+		int BestScore = INT_MAX;
+		for (int i = 0; i < 9; i++) {
+			if (TilesArray[i]->BaseColor == FLinearColor::Gray)
+			{
+				TilesArray[i]->BaseColor = FLinearColor::Blue;
+				BestScore = FMath::Min(BestScore, Minimax(TilesArray, true));
+				TilesArray[i]->BaseColor = FLinearColor::Gray;
+			}
+		}
+		return BestScore;
+	}
+}
+
+bool ATileManager::IsFull(TArray<ATileActor*> TilesArray)
+{
+	for(int i=0; i<TilesArray.Num(); i++)
+	{
+		if(TilesArray[i]->BaseColor == FLinearColor::Gray)
+		{
+			return false;
+		}
+	}
+	return true;
 }

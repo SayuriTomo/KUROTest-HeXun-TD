@@ -57,9 +57,20 @@ void UMain_UserWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 		}
 		PlayerScoreBlock->SetText(FText::FromString(FString::FromInt(TileManager->PlayerScore)));
 		EnemyScoreBlock->SetText(FText::FromString(FString::FromInt(TileManager->EnemyScore)));
-		
-		LastWinnerBlock->SetText(FText::FromString(TileManager->LastWinner));
-		
+
+		switch (TileManager->LastWinner)
+		{
+			case 0:
+				LastWinnerBlock->SetText(FText::FromString(TEXT("无")));
+				break;
+			case 1:
+				LastWinnerBlock->SetText(FText::FromString(TEXT("玩家")));
+				break;
+			case 2:
+				LastWinnerBlock->SetText(FText::FromString(TEXT("AI敌人")));
+				break;
+			default:
+				break;
+		}
 	}
-	
 }

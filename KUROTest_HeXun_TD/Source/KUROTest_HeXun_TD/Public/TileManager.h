@@ -33,7 +33,7 @@ public:
 	bool bIsGameStart = false;
 	float DelayTime = 2;
 	int CurrentFaceIndex;
-	FString LastWinner = "";
+	int LastWinner = 0;
 
 	void EndGame();
 	bool bIsEndGame = false;
@@ -41,4 +41,16 @@ public:
 	FRotator DegreeRequired;
 	float CurrentRotation = 0.0f;
 	UPROPERTY(EditAnywhere)TArray<AFaceManager*> FacesArray;
+
+	
+	void GenerateAIDecision();
+	
+	int Evaluate(TArray<ATileActor*> Board);
+
+	int Minimax(TArray<ATileActor*> Board, bool bIsMax);
+
+	bool IsFull(TArray<ATileActor*> Board);
+
+	//UFUNCTION(BlueprintCallable)void LeftRotate();
+	//UFUNCTION(BlueprintCallable)void DownRotate();
 };

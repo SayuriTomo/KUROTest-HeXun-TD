@@ -26,4 +26,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))class UTextBlock* PlayerScoreBlock;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))class UTextBlock* EnemyScoreBlock;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))class UButton* StartButton;
+
+	//UPROPERTY(BlueprintReadWrite, meta = (BindWidget))class UButton* LeftRotateButton;
+	//UPROPERTY(BlueprintReadWrite, meta = (BindWidget))class UButton* DownRotateButton;
 };
