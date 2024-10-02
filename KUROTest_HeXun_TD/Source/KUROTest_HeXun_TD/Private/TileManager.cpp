@@ -34,55 +34,9 @@ void ATileManager::Tick(float DeltaTime)
 
 	if(bIsGameStart)
 	{
-		for(AFaceManager* Face:FacesArray)
-		{
-			if(Face->bIsActivating)
-			{
-				FLinearColor FaceWinnerColor = Face->CheckFaceWin();
-				if(FaceWinnerColor==FLinearColor::Blue||FaceWinnerColor==FLinearColor::Red)
-				{
-					Face->bIsFinished = true;
-					for(ATileActor* TileActor:Face->TilesArray)
-					{
-						TileActor->ChangeColor(FaceWinnerColor,true);
-						TileActor->BaseColor = FaceWinnerColor;
-					}
-					if(FaceWinnerColor==FLinearColor::Blue)PlayerScore+=1;
-					else if(FaceWinnerColor==FLinearColor::Red)EnemyScore+=1;
+		ManageFaces();
 
-					if(PlayerScore>=3||EnemyScore>=3)
-					{
-						EndGame();
-					}
-				}
-				if(Face->CheckFaceDraw())
-				{
-					Face->bIsFinished = true;
-				}
-				CurrentFaceIndex = Face->NextFace;
-				
-				bool Flag = true;
-				while (Flag)
-				{
-					if(!FacesArray[CurrentFaceIndex]->bIsFinished && Face != FacesArray[CurrentFaceIndex])
-					{
-						Flag = false;
-					}
-					else
-					{
-						CurrentFaceIndex = FMath::RandRange(0,5);
-					}
-				}
-				
-				UE_LOG(LogTemp,Warning,TEXT("Attempting to move face %i"),CurrentFaceIndex);
-				DegreeRequired = Face->DegreeSet[CurrentFaceIndex];
-				
-				UE_LOG(LogTemp,Warning,TEXT("p%f,y%f,r%f"),DegreeRequired.Pitch,DegreeRequired.Yaw,DegreeRequired.Roll);
-				Face->bIsActivating = false;
-				bIsRotating = true;
-			}
-		}
-
+		// 准备旋转
 		if(bIsRotating)
 		{
 			if(CurrentRotation<45)
@@ -92,7 +46,7 @@ void ATileManager::Tick(float DeltaTime)
 			}
 			else
 			{
-			
+				// 旋转完毕，轮到玩家或者ai回合
 				bIsRotating = false;;
 				CurrentRotation = 0;
 			
@@ -101,6 +55,58 @@ void ATileManager::Tick(float DeltaTime)
 					GetWorld()->GetTimerManager().SetTimer(DelayTimerHandle, this, &ATileManager::MoveToAITurn, DelayTime, true);
 				}
 			}
+		}
+	}
+}
+
+void ATileManager::ManageFaces()
+{
+	for(AFaceManager* Face:FacesArray)
+	{
+		if(Face->bIsActivating)
+		{
+			// 检测当前棋盘胜负或平局
+			FLinearColor FaceWinnerColor = Face->CheckFaceWin();
+			if(FaceWinnerColor==FLinearColor::Blue||FaceWinnerColor==FLinearColor::Red)
+			{
+				Face->bIsFinished = true;
+				for(ATileActor* TileActor:Face->TilesArray)
+				{
+					TileActor->ChangeColor(FaceWinnerColor,true);
+					TileActor->BaseColor = FaceWinnerColor;
+				}
+				if(FaceWinnerColor==FLinearColor::Blue)PlayerScore+=1;
+				else if(FaceWinnerColor==FLinearColor::Red)EnemyScore+=1;
+
+				if(PlayerScore>=3||EnemyScore>=3)
+				{
+					EndGame();
+				}
+			}
+			if(Face->CheckFaceDraw())
+			{
+				Face->bIsFinished = true;
+			}
+
+			// 检测下一个棋盘是否符合
+			CurrentFaceIndex = Face->NextFace;
+			bool Flag = true;
+			while (Flag)
+			{
+				if(!FacesArray[CurrentFaceIndex]->bIsFinished && Face != FacesArray[CurrentFaceIndex])
+				{
+					Flag = false;
+				}
+				else
+				{
+					CurrentFaceIndex = FMath::RandRange(0,5);
+				}
+			}
+				
+			UE_LOG(LogTemp,Warning,TEXT("Attempting to move face %i"),CurrentFaceIndex);
+			DegreeRequired = Face->DegreeSet[CurrentFaceIndex];
+			Face->bIsActivating = false;
+			bIsRotating = true;
 		}
 	}
 }
@@ -162,6 +168,7 @@ void ATileManager::MoveToAITurn()
 
 void ATileManager::GenerateFaces()
 {
+	// 初始化棋盘
 	for(AFaceManager* Face:FacesArray)
 	{
 		Face->bIsFinished = false;

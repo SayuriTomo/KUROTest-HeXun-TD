@@ -28,7 +28,11 @@ void AFaceManager::BeginPlay()
 void AFaceManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
+	ManageTiles();
+}
+
+void AFaceManager::ManageTiles()
+{
 	for(int i = 0;i<TilesArray.Num();i++)
 	{
 		if(TilesArray[i]->bIsSelected)

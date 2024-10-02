@@ -33,9 +33,12 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	
+
+	void ManageTiles();
+
 	FLinearColor CheckFaceWin();
 	bool CheckFaceDraw();
+	
 	bool bIsActivating = false;
 	bool bIsFinished = false;
 	int NextFace;
