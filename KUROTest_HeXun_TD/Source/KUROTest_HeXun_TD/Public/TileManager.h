@@ -41,16 +41,15 @@ public:
 	FRotator DegreeRequired;
 	float CurrentRotation = 0.0f;
 	UPROPERTY(EditAnywhere)TArray<AFaceManager*> FacesArray;
-
 	
-	void GenerateAIDecision();
+	
 	
 	int Evaluate(TArray<ATileActor*> Board);
 
-	int Minimax(TArray<ATileActor*> Board, bool bIsMax);
-
-	bool IsFull(TArray<ATileActor*> Board);
-
+	// 极小极大
+	//void GenerateAIDecision();
+	//int Minimax(TArray<ATileActor*> Board, bool bIsMax);
+	//bool IsFull(TArray<ATileActor*> Board);
 	//UFUNCTION(BlueprintCallable)void LeftRotate();
 	//UFUNCTION(BlueprintCallable)void DownRotate();
 };

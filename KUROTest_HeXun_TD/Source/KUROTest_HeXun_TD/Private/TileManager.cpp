@@ -108,8 +108,34 @@ void ATileManager::Tick(float DeltaTime)
 void ATileManager::MoveToAITurn()
 {
 	GetWorld()->GetTimerManager().ClearTimer(DelayTimerHandle);
-	if(FMath::RandBool())
+	int BestScore = INT_MIN;
+	int BestMove = -1;
+
+	// 只检测当前棋盘的下一步胜负
+	for (int i = 0; i < 9; ++i) {
+		if (FacesArray[CurrentFaceIndex]->TilesArray[i]->BaseColor == FLinearColor::Gray)
+		{
+			int Score = 0;
+			FacesArray[CurrentFaceIndex]->TilesArray[i]->BaseColor = FLinearColor::Red;
+			int AIScore = abs(Evaluate(FacesArray[CurrentFaceIndex]->TilesArray));
+			FacesArray[CurrentFaceIndex]->TilesArray[i]->BaseColor = FLinearColor::Gray;
+			
+			FacesArray[CurrentFaceIndex]->TilesArray[i]->BaseColor = FLinearColor::Blue;
+			int RivalScore = abs(Evaluate(FacesArray[CurrentFaceIndex]->TilesArray));
+			FacesArray[CurrentFaceIndex]->TilesArray[i]->BaseColor = FLinearColor::Gray;
+
+			Score = AIScore<RivalScore?RivalScore:AIScore;
+
+			if (Score > BestScore) {
+				BestScore = Score;
+				BestMove = i;
+			}
+		}
+	}
+	// 如果分不出胜负，则随机
+	if(BestScore == 0)
 	{
+		UE_LOG(LogTemp,Warning,TEXT("下哪都行"));
 		bool Flag = true;
 		int RandTile = 0;
 		while (Flag)
@@ -123,13 +149,15 @@ void ATileManager::MoveToAITurn()
 		FacesArray[CurrentFaceIndex]->TilesArray[RandTile]->ChangeColor(FLinearColor::Red,true);
 		FacesArray[CurrentFaceIndex]->TilesArray[RandTile]->bIsSelected = true;
 		FacesArray[CurrentFaceIndex]->TilesArray[RandTile]->BaseColor = FLinearColor::Red;
-
-		Cast<AKUROTest_HeXun_TDCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn())->bIsMyTurn = true;
 	}
 	else
 	{
-		GenerateAIDecision();
+		UE_LOG(LogTemp,Warning,TEXT("必须下这"));
+		FacesArray[CurrentFaceIndex]->TilesArray[BestMove]->ChangeColor(FLinearColor::Red,true);
+		FacesArray[CurrentFaceIndex]->TilesArray[BestMove]->bIsSelected = true;
+		FacesArray[CurrentFaceIndex]->TilesArray[BestMove]->BaseColor = FLinearColor::Red;
 	}
+	Cast<AKUROTest_HeXun_TDCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn())->bIsMyTurn = true;
 }
 
 void ATileManager::GenerateFaces()
@@ -168,33 +196,6 @@ void ATileManager::EndGame()
 	{
 		LastWinner = 2;
 	}
-}
-
-
-void ATileManager::GenerateAIDecision()
-{
-	int BestScore = INT_MIN;
-	int BestMove = -1;
-
-	for (int i = 0; i < 9; ++i) {
-		if (FacesArray[CurrentFaceIndex]->TilesArray[i]->BaseColor == FLinearColor::Gray)
-		{
-			FacesArray[CurrentFaceIndex]->TilesArray[i]->BaseColor = FLinearColor::Red;
-			int Score = Minimax(FacesArray[CurrentFaceIndex]->TilesArray, true);
-			FacesArray[CurrentFaceIndex]->TilesArray[i]->BaseColor = FLinearColor::Gray;
-
-			if (Score > BestScore) {
-				BestScore = Score;
-				BestMove = i;
-			}
-		}
-	}
-	
-	FacesArray[CurrentFaceIndex]->TilesArray[BestMove]->ChangeColor(FLinearColor::Red,true);
-	FacesArray[CurrentFaceIndex]->TilesArray[BestMove]->bIsSelected = true;
-	FacesArray[CurrentFaceIndex]->TilesArray[BestMove]->BaseColor = FLinearColor::Red;
-	
-	Cast<AKUROTest_HeXun_TDCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn())->bIsMyTurn = true;
 }
 
 int ATileManager::Evaluate(TArray<ATileActor*> TilesArray)
@@ -259,6 +260,32 @@ int ATileManager::Evaluate(TArray<ATileActor*> TilesArray)
 	
 	return 0;
 }
+/*
+void ATileManager::GenerateAIDecision()
+{
+	int BestScore = INT_MIN;
+	int BestMove = -1;
+
+	for (int i = 0; i < 9; ++i) {
+		if (FacesArray[CurrentFaceIndex]->TilesArray[i]->BaseColor == FLinearColor::Gray)
+		{
+			FacesArray[CurrentFaceIndex]->TilesArray[i]->BaseColor = FLinearColor::Red;
+			int Score = Minimax(FacesArray[CurrentFaceIndex]->TilesArray, true);
+			FacesArray[CurrentFaceIndex]->TilesArray[i]->BaseColor = FLinearColor::Gray;
+
+			if (Score > BestScore) {
+				BestScore = Score;
+				BestMove = i;
+			}
+		}
+	}
+	
+	FacesArray[CurrentFaceIndex]->TilesArray[BestMove]->ChangeColor(FLinearColor::Red,true);
+	FacesArray[CurrentFaceIndex]->TilesArray[BestMove]->bIsSelected = true;
+	FacesArray[CurrentFaceIndex]->TilesArray[BestMove]->BaseColor = FLinearColor::Red;
+	
+	Cast<AKUROTest_HeXun_TDCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn())->bIsMyTurn = true;
+}
 
 int ATileManager::Minimax(TArray<ATileActor*> TilesArray, bool bIsMax)
 {
@@ -305,4 +332,4 @@ bool ATileManager::IsFull(TArray<ATileActor*> TilesArray)
 		}
 	}
 	return true;
-}
+}*/
