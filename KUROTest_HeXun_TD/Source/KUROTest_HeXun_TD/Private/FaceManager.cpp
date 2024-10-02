@@ -17,7 +17,8 @@ AFaceManager::AFaceManager()
 void AFaceManager::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	//绑定所有棋片
 	for(ATileActor* Tile:TilesArray)
 	{
 		Tile->AttachToActor(this,FAttachmentTransformRules::KeepWorldTransform);

@@ -20,7 +20,8 @@ ATileManager::ATileManager()
 void ATileManager::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	// 绑定所有棋盘
 	for(AFaceManager* Face:FacesArray)
 	{
 		Face->AttachToActor(this,FAttachmentTransformRules::KeepWorldTransform);
@@ -99,6 +100,7 @@ void ATileManager::ManageFaces()
 				}
 				else
 				{
+					UE_LOG(LogTemp,Warning,TEXT("棋盘已满"));
 					CurrentFaceIndex = FMath::RandRange(0,5);
 				}
 			}
@@ -186,6 +188,7 @@ void ATileManager::GenerateFaces()
 	PlayerScore = 0;
 	EnemyScore = 0;
 	DegreeRequired = FRotator(0,0,0);
+	SetActorRotation(FRotator(0,0,0));
 }
 
 void ATileManager::EndGame()
@@ -194,7 +197,7 @@ void ATileManager::EndGame()
 	bIsEndGame = true;
 	bIsRotating = false;
 	CurrentRotation = 0.0f;
-	SetActorRotation(FRotator(0,0,0));
+	SetActorRotation(FRotator(0,45,0));
 	if(PlayerScore>=3)
 	{
 		LastWinner = 1;
